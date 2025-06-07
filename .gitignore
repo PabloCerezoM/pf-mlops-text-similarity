@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Env vars
+.env
+
+# Wandb/artifacts
+wandb/
+artifacts/
+
+# VSCode (opcional)
+.vscode/

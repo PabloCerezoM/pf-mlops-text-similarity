@@ -1,0 +1,14 @@
+
+services:
+  similarity-api:
+    build: ./similarity_service
+    env_file: .env
+    ports:
+      - "8000:8000"
+
+  similarity-ui:
+    build: ./similarity_ui
+    ports:
+      - "5000:5000"
+    depends_on:
+      - similarity-api
