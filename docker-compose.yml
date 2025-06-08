@@ -1,14 +1,14 @@
+version: '3.8'
 
 services:
   similarity-api:
-    build: ./similarity_service
-    env_file: .env
+    image: pfmlops.azurecr.io/similarity-api:latest
     ports:
-      - "8000:8000"
+      - 8000:8000
 
   similarity-ui:
-    build: ./similarity_ui
+    image: pfmlops.azurecr.io/similarity-ui:latest
     ports:
-      - "5000:5000"
+      - 5000:5000
     depends_on:
       - similarity-api

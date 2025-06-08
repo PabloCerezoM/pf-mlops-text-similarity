@@ -4,6 +4,7 @@ __pycache__/
 
 # Env vars
 .env
+.docker-compose.standalone.yml
 
 # Wandb/artifacts
 wandb/

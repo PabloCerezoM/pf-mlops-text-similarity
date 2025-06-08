@@ -1,8 +1,10 @@
 from flask import Flask, render_template, request
 import requests
 
+
 app = Flask(__name__)
-API_URL = "http://similarity-api:8000/predict"
+API_URL = "http://localhost:8000/predict"
+
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -16,3 +18,6 @@ def index():
         else:
             result = {"error": "Error al llamar al microservicio"}
     return render_template("index.html", result=result)
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)

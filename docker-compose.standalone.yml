@@ -1,0 +1,18 @@
+services:
+  similarity-api:
+    build: ./similarity_service
+    ports:
+      - 8000:8000
+    environment:
+      - WANDB_API_KEY
+      - WANDB_PROJECT
+      - WANDB_ARTIFACT
+      - MODEL_NAME
+
+  similarity-ui:
+    build: ./similarity_ui   # <-- Aquí está el arreglo
+    ports:
+      - 5000:5000
+    depends_on:
+      - similarity-api
+
