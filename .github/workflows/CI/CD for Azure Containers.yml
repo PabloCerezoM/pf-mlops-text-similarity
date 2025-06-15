@@ -52,13 +52,17 @@ jobs:
 
     - name: Build and push similarity-api
       run: |
-        docker build -t $AZURE_CONTAINER_REGISTRY/${API_IMAGE_NAME}:latest -f similarity_service/Dockerfile .
+        docker build -t $AZURE_CONTAINER_REGISTRY/${API_IMAGE_NAME}:latest -f similarity_service/Dockerfile similarity_service
+        docker push $AZURE_CONTAINER_REGISTRY/${API_IMAGE_NAME}:latest
+
 
         docker push $AZURE_CONTAINER_REGISTRY/${API_IMAGE_NAME}:latest
 
     - name: Build and push similarity-ui
       run: |
-        docker build -t $AZURE_CONTAINER_REGISTRY/${UI_IMAGE_NAME}:latest -f similarity_ui/Dockerfile .
+        docker build -t $AZURE_CONTAINER_REGISTRY/${UI_IMAGE_NAME}:latest -f similarity_ui/Dockerfile similarity_ui
+        docker push $AZURE_CONTAINER_REGISTRY/${UI_IMAGE_NAME}:latest
+
 
         docker push $AZURE_CONTAINER_REGISTRY/${UI_IMAGE_NAME}:latest
 
