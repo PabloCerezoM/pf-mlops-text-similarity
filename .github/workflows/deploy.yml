@@ -1,0 +1,70 @@
+name: CI/CD for Azure Containers
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  AZURE_CONTAINER_REGISTRY: pfmlops.azurecr.io
+  RESOURCE_GROUP: pf-mlops
+  WEB_APP_NAME: similarity-texts-app   # Cambia si tu App Service tiene otro nombre
+  UI_IMAGE_NAME: similarity-ui
+  API_IMAGE_NAME: similarity-api
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set WANDB environment variables for tests
+      run: |
+        echo "WANDB_API_KEY=${{ secrets.WANDB_API_KEY }}" >> $GITHUB_ENV
+        echo "WANDB_PROJECT=${{ secrets.WANDB_PROJECT }}" >> $GITHUB_ENV
+        echo "WANDB_ARTIFACT=${{ secrets.WANDB_ARTIFACT }}" >> $GITHUB_ENV
+        echo "MODEL_NAME=${{ secrets.MODEL_NAME }}" >> $GITHUB_ENV
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies for similarity-api
+      run: |
+        cd similarity_service
+        pip install -r requirements.txt
+
+    - name: Run API tests
+      run: |
+        cd similarity_service
+        pytest
+
+    - name: Log in to Azure
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Log in to Azure Container Registry
+      run: az acr login --name pfmlops
+
+    - name: Build and push similarity-api
+      run: |
+        docker build -t $AZURE_CONTAINER_REGISTRY/${API_IMAGE_NAME}:latest -f similarity_service/Dockerfile similarity_service
+        docker push $AZURE_CONTAINER_REGISTRY/${API_IMAGE_NAME}:latest
+
+    - name: Build and push similarity-ui
+      run: |
+        docker build -t $AZURE_CONTAINER_REGISTRY/${UI_IMAGE_NAME}:latest -f similarity_ui/Dockerfile similarity_ui
+        docker push $AZURE_CONTAINER_REGISTRY/${UI_IMAGE_NAME}:latest
+
+    - name: Deploy to Azure Web App (multi-container)
+      uses: azure/webapps-deploy@v3
+      with:
+        app-name: ${{ env.WEB_APP_NAME }}
+        images: |
+          ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.UI_IMAGE_NAME }}:latest
+          ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.API_IMAGE_NAME }}:latest
+
